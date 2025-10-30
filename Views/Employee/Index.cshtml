@@ -1,0 +1,270 @@
+﻿@model AssignProject.Models.Employee
+@{
+    var isEdit = Model.Employee_ID != 0;
+    var employeeList = ViewData["EmployeeList"] as List<AssignProject.Models.Employee>;
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background-color: #dee2e5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .card {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+            .btn-custom:hover {
+                background-color: #0056b3;
+                color: #fff;
+            }
+
+        /* Validation alert */
+        #validationAlert {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-controller="DashBoard" asp-action="Index">Dashboard</a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav">
+                    <li class="nav-item me-2">
+                        <form asp-controller="DashBoard" asp-action="Index" method="post">
+                            <button type="submit" class="btn btn-outline-light">
+                                <i class="bi bi-arrow-left-circle"></i> Back
+                            </button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-controller="Admin" asp-action="Logout" method="post">
+                            <button type="submit" class="btn btn-outline-light">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="bg-warning text-center fw-bold p-2">
+                Employee Registration
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- Success Message -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success text-center fw-bold mb-4" id="successMessage">
+                @TempData["Message"]
+            </div>
+        }
+
+        <!-- Validation Alert -->
+        <div id="validationAlert" class="alert alert-danger text-center fw-bold mb-4"></div>
+
+        <div class="card p-4 mb-4">
+            <form id="employeeForm" asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                <input type="hidden" asp-for="Employee_ID" />
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Employee_First_Name" class="form-label">
+                            <i class="bi bi-person-fill"></i> First Name
+                        </label>
+                        <input asp-for="Employee_First_Name" class="form-control" placeholder="Enter First Name" />
+                        <span asp-validation-for="Employee_First_Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Employee_Middle_Name" class="form-label">
+                            <i class="bi bi-person-lines-fill"></i> Middle Name
+                        </label>
+                        <input asp-for="Employee_Middle_Name" class="form-control" placeholder="Enter Middle Name" />
+                        <span  class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Employee_Last_Name" class="form-label">
+                            <i class="bi bi-person-badge-fill"></i> Last Name
+                        </label>
+                        <input asp-for="Employee_Last_Name" class="form-control" placeholder="Enter Last Name" />
+                        <span class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Employee_WhatsApp_Number" class="form-label">
+                            <i class="bi bi-whatsapp"></i> WhatsApp Number
+                        </label>
+                        <input asp-for="Employee_WhatsApp_Number" class="form-control" type="number" placeholder="Enter WhatsApp number" />
+                        <span  class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a asp-action="Index" class="btn btn-secondary me-2">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-custom">
+                        <i class="bi bi-check-circle"></i> @(isEdit ? "Update" : "Register")
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">Employee List</h4>
+                <form action="/Employee/Index" method="get" class="input-group" style="max-width: 300px;" novalidate>
+                    <input type="text" name="searchString" class="form-control" placeholder="Search by name..." />
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>WhatsApp Number</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (employeeList != null && employeeList.Any())
+                        {
+                            int count = 1;
+                            foreach (var emp in employeeList)
+                            {
+                                <tr>
+                                    <th scope="row">@count</th>
+                                    <td>@($"{emp.Employee_First_Name} {(emp.Employee_Middle_Name ?? "")} {emp.Employee_Last_Name}")</td>
+                                    <td>@emp.Employee_WhatsApp_Number</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-info me-1" asp-action="Index" asp-route-editId="@emp.Employee_ID">
+                                            <i class="bi bi-pencil-square"></i> Update
+                                        </a>
+                                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@emp.Employee_ID" onclick="return confirm('Are you sure you want to delete this Employee?')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No employees found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Show validation message
+        function showValidation(message) {
+            const alertBox = document.getElementById("validationAlert");
+            alertBox.textContent = message;
+            alertBox.style.display = "block";
+            alertBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                alertBox.style.display = "none";
+                alertBox.textContent = "";
+            }, 4000);
+        }
+
+        function clearValidation() {
+            const alertBox = document.getElementById("validationAlert");
+            alertBox.style.display = "none";
+            alertBox.textContent = "";
+        }
+
+        // Clear validation on input
+        document.querySelectorAll("input").forEach(el => {
+            el.addEventListener("input", clearValidation);
+            el.addEventListener("change", clearValidation);
+        });
+
+        // Form validation
+        document.getElementById("employeeForm").addEventListener("submit", function(e) {
+            clearValidation();
+
+            const firstName = document.querySelector("input[name='Employee_First_Name']").value.trim();
+            const lastName = document.querySelector("input[name='Employee_Last_Name']").value.trim();
+            const whatsapp = document.querySelector("input[name='Employee_WhatsApp_Number']").value.trim();
+
+            if (!firstName) {
+                e.preventDefault();
+                showValidation("⚠️ Please enter First Name.");
+                return;
+            }
+
+            if (!lastName) {
+                e.preventDefault();
+                showValidation("⚠️ Please enter Last Name.");
+                return;
+            }
+
+            if (!whatsapp || whatsapp.length < 10) {
+                e.preventDefault();
+                showValidation("⚠️ Please enter a valid WhatsApp Number (at least 10 digits).");
+                return;
+            }
+        });
+
+        // Auto-hide success message
+        setTimeout(() => {
+            const success = document.getElementById("successMessage");
+            if (success) success.style.display = 'none';
+        }, 3000);
+    </script>
+</body>
+</html>

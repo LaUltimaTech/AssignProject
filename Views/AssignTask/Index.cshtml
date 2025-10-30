@@ -1,0 +1,323 @@
+﻿@model AssignProject.Models.AssignTaskPageViewModel
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Assign Task";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assign Task</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background-color: #dee2e5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .card {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .uniform-btn {
+            width: 110px;
+            margin: 0 5px;
+        }
+
+        textarea.form-control {
+            resize: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <!-- ✅ Dashboard link -->
+            <a class="navbar-brand" asp-controller="DashBoard" asp-action="Index">Dashboard</a>
+
+            <div class="d-flex gap-2 ms-auto">
+                <a asp-controller="DashBoard" asp-action="Index" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left-circle"></i> Back
+                </a>
+                <a asp-controller="Admin" asp-action="Admin" class="btn btn-outline-light">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="container">
+            <div class="alert alert-success text-center fw-bold my-3">
+                @TempData["Message"]
+            </div>
+        </div>
+    }
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-warning text-center fw-bold p-2">
+                    <i class="bi bi-pencil-square"></i> Assign Task
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ Bootstrap Validation Alert -->
+        <div id="validationAlert" class="alert alert-danger d-none text-center fw-bold mt-3" role="alert"></div>
+
+        <form asp-action="@(Model.FormModel.Task_Unique_ID == 0 ? "Create" : "Update")" method="post">
+            <input type="hidden" asp-for="FormModel.Task_Unique_ID" />
+
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-list-ol"></i> Task No.</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="FormModel.Task_Number" id="Task_Number"
+                               value="@(Model.FormModel.Task_Number == 0 ? "" : Model.FormModel.Task_Number.ToString())" readonly>
+
+                        <button type="button" class="btn btn-outline-secondary" id="btnNewTop" title="Generate New Task Number">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-calendar-check"></i> Assigned Date</label>
+                   
+                    <input type="date" class="form-control"
+                           name="FormModel.Task_Assigned_Date"
+                           id="Task_Assigned_Date"
+                           value="@(Model.FormModel.Task_Unique_ID == 0
+                ? DateTime.Now.ToString("yyyy-MM-dd")
+                : Model.FormModel.Task_Assigned_Date.ToString("yyyy-MM-dd"))" />
+
+
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-calendar-x"></i> Approx Completion Date</label>
+                 
+                    <input type="date" class="form-control"
+                           name="FormModel.Approx_Completion_Date"
+                           id="Approx_Completion_Date"
+                           value="@(Model.FormModel.Task_Unique_ID == 0
+                ? DateTime.Now.ToString("yyyy-MM-dd")
+                : Model.FormModel.Approx_Completion_Date.ToString("yyyy-MM-dd"))" />
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white fw-bold text-center">
+                            <i class="bi bi-card-text"></i> Task Description
+                        </div>
+                        <div class="card-body p-2" style="height: 200px;">
+                            <textarea class="form-control h-100" name="FormModel.Task_Description">@Model.FormModel.Task_Description</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white fw-bold text-center">
+                            <i class="bi bi-people"></i> Select Employee
+                        </div>
+                        <div class="card-body d-flex flex-column p-2" style="height: 200px;">
+                            <div class="flex-grow-1 overflow-auto mb-2">
+                                @foreach (var emp in Model.FormModel.AvailableEmployees)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="SelectedEmployeeIds" value="@emp.Employee_ID"
+                                               id="emp@emp.Employee_ID"
+                                        @(Model.FormModel.SelectedEmployeeIds.Contains(emp.Employee_ID) ? "checked" : "")>
+                                        <label class="form-check-label" for="emp@emp.Employee_ID">
+                                            <i class="bi bi-person"></i> @emp.Employee_First_Name @emp.Employee_Last_Name
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                            <div>
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label" for="selectAll"><i class="bi bi-check2-square"></i> All</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-primary uniform-btn" id="btnNewBottom">
+                    <i class="bi bi-file-earmark-plus"></i> New
+                </button>
+
+                <button type="submit" class="btn btn-primary uniform-btn">
+                    <i class="bi bi-send"></i> @(Model.FormModel.Task_Unique_ID == 0 ? "Send" : "Update")
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary uniform-btn">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <table class="table table-bordered text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Task Description</th>
+                            <th>Employees</th>
+                            <th>Status</th> <!-- New column -->
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var task in Model.AllTasks.OrderByDescending(t => t.Task_Unique_ID))
+                        {
+                            <tr>
+                                <td>@task.Task_Number</td>
+                                <td>@task.Task_Description</td>
+                                <td>@string.Join(", ", task.AssignedEmployeeNames.Split(',').Select(n => n.Trim()))</td>
+                                <td>
+                                    @(task.WhatsAppStatus == "Active" ? "In Progress" : "Complete")
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="@Url.Action("Edit", new { id = task.Task_Unique_ID })" class="btn btn-info uniform-btn">
+                                            <i class="bi bi-pencil-square"></i> Update
+                                        </a>
+                                        <form method="post" asp-action="Delete" asp-route-id="@task.Task_Unique_ID" onclick="return confirm('Are you sure you want to delete this Task?')">
+                                            <button type="submit" class="btn btn-danger uniform-btn">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                        @if (task.WhatsAppStatus == "Active")
+                                        {
+                                            <form method="post" asp-action="StopWhatsApp" asp-route-id="@task.Task_Unique_ID">
+                                                <button type="submit" class="btn btn-dark uniform-btn">
+                                                    <i class="bi bi-stop-circle"></i> Stop
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById("selectAll").addEventListener("change", function () {
+            const checked = this.checked;
+            document.querySelectorAll("input[name='SelectedEmployeeIds']").forEach(cb => cb.checked = checked);
+        });
+
+        async function generateTaskNumber() {
+            const btns = [document.getElementById("btnNewTop"), document.getElementById("btnNewBottom")];
+            btns.forEach(b => { if (b) b.disabled = true; });
+
+            try {
+                const response = await fetch("/AssignTask/GetNewTaskNumber");
+                const taskNo = await response.json();
+                document.getElementById("Task_Number").value = taskNo;
+            } catch (error) {
+                showValidation("⚠️ Error generating task number.");
+                console.error(error);
+            } finally {
+                btns.forEach(b => { if (b) b.disabled = false; });
+            }
+        }
+
+        const btnNewBottom = document.getElementById("btnNewBottom");
+        const btnNewTop = document.getElementById("btnNewTop");
+        if (btnNewBottom) btnNewBottom.addEventListener("click", generateTaskNumber);
+        if (btnNewTop) btnNewTop.addEventListener("click", generateTaskNumber);
+
+        function showValidation(message) {
+            const alertBox = document.getElementById("validationAlert");
+            alertBox.textContent = message;
+            alertBox.classList.remove("d-none");
+            alertBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                alertBox.classList.add("d-none");
+                alertBox.textContent = "";
+            }, 4000);
+        }
+
+        function clearValidation() {
+            const alertBox = document.getElementById("validationAlert");
+            alertBox.classList.add("d-none");
+            alertBox.textContent = "";
+        }
+
+        document.querySelectorAll("input, textarea").forEach(el => {
+            el.addEventListener("input", clearValidation);
+            el.addEventListener("change", clearValidation);
+        });
+
+        document.querySelector("form").addEventListener("submit", function (e) {
+            clearValidation();
+
+            const taskNo = document.getElementById("Task_Number").value.trim();
+            const taskDesc = document.querySelector("textarea[name='FormModel.Task_Description']").value.trim();
+            const selectedEmployees = document.querySelectorAll("input[name='SelectedEmployeeIds']:checked").length;
+            const assignedDate = document.getElementById("Task_Assigned_Date").value;
+            const approxDate = document.querySelector("input[name='FormModel.Approx_Completion_Date']").value;
+
+            if (!taskNo || taskNo === "0") {
+                e.preventDefault();
+                showValidation("⚠️ Please generate a Task Number before submitting.");
+                return;
+            }
+
+            if (taskDesc === "") {
+                e.preventDefault();
+                showValidation("⚠️ Please enter a Task Description.");
+                return;
+            }
+
+            if (selectedEmployees === 0) {
+                e.preventDefault();
+                showValidation("⚠️ Please select at least one employee.");
+                return;
+            }
+
+            if (approxDate < assignedDate) {
+                e.preventDefault();
+                showValidation("⚠️ Approx. Completion Date must be the same or later than Assigned Date.");
+                return;
+            }
+
+        });
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert-success');
+            if (alert) alert.style.display = 'none';
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+          background-color: #dee2e5;
+        }
+        .card-link {
+          text-decoration: none;
+          color: inherit;
+        }
+        .card {
+          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+          cursor: pointer;
+        }
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .card-icon {
+          font-size: 3rem;
+          margin-bottom: 15px;
+          color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <form asp-controller="Admin" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5 mb-4">
+                <a asp-controller="Employee" asp-action="Index" class="card-link">
+                    <div class="card p-4 text-center">
+                        <i class="bi bi-person-plus-fill card-icon"></i>
+                        <h3>Employee Registration</h3>
+                        <p class="text-muted">Register a new employee.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-5 mb-4">
+                <a asp-controller="AssignTask" asp-action="Index" class="card-link">
+                    <div class="card p-4 text-center">
+                        <i class="bi bi-journal-check card-icon"></i>
+                        <h3>Task Assign</h3>
+                        <p class="text-muted">Assign new tasks to employees.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
