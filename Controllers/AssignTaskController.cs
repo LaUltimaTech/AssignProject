@@ -205,7 +205,7 @@ namespace AssignProject.Controllers
 
         private async Task SendWhatsAppMessageAsync(string phoneNumber, string message)
         {
-            var authKey = "cmgiygvoy02sqf0nc58y75a5l"; // Replace with your actual token
+            var authKey = "cmhzyz6ea0lqwjx4kp47h2zmw"; // Replace with your actual token
             var encodedMessage = Uri.EscapeDataString(message);
             var url = $"https://wts.vision360solutions.co.in/api/sendText?token={authKey}&phone={phoneNumber}&message={encodedMessage}";
 
